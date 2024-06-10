@@ -1,0 +1,4 @@
+# Dockerfile
+FROM migrate/migrate:v4.15.2
+COPY ./internal/repository/migrations /migrations
+ENTRYPOINT [ "migrate" ]
