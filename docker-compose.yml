@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgresDB
+      PGDATA: /data/postgres
+    networks:
+      - db
+    volumes:
+       - postgres:/data/postgres
+
+  migrate:
+    restart: on-failure
+    networks:
+        - db
+    build: 
+      context: .
+      dockerfile: Dockerfile.migrate
+    depends_on:
+      - db
+    command: ["-path", "/migrations", "-database", "postgres://postgres:postgres@db:5432/postgresDB?sslmode=disable", "up"]
+    links: 
+      - db
+
+  todo:
+    image: zomgra/todo
+    restart: on-failure
+    entrypoint: ["./wait-for-it.sh", "db:5432", "--", "./main"]
+    environment:
+      - PORT=:1232
+      - DB_URL=postgresql://postgres:postgres@db:5432/postgresDB?sslmode=disable
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 1232:1232
+    networks:
+      - db
+    depends_on:
+      - db
+
+volumes:
+    postgres:
+
+networks:
+  db:
+    driver: bridge
