@@ -85,3 +85,17 @@ func TestUpdateFailureWithExistID(t *testing.T) {
 	err := service.Update(ctx, notExistsUuid, newTopic, newDescription)
 	require.EqualError(t, err, models.ErrTodoNotFound.Error())
 }
+
+func TestUpdateDBError(t *testing.T) {
+	mockRepo := repository.RepositoryMock{
+		UpdateFunc: func(ctx context.Context, tx sqlx.ExtContext, id, topic, description string) error {
+			return errors.New("Internal DB Error")
+		},
+		GetByIDFunc: func(ctx context.Context, tx sqlx.ExtContext, id string) (*models.Todo, error) {
+			return &models.Todo{Topic: "test", Description: "test"}, nil
+		},
+	}
+	service := service.New(nil, &mockRepo)
+	err := service.Update(context.Background(), uuid.NewString(), "topic", "description")
+	require.EqualError(t, err, "Internal DB Error")
+}

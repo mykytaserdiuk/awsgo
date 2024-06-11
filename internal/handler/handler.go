@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/mykytaserdiuk/aws-go/internal"
+	"github.com/mykytaserdiuk/aws-go/pkg/models"
 )
 
 type Handler struct {
@@ -24,13 +25,15 @@ func NewHandler(router *mux.Router, service internal.Service) *Handler {
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	type Request struct {
-		Topic       string `json:"topic"`
-		Description string `json:"description"`
-	}
-	var request Request
 
-	err := json.NewDecoder(r.Body).Decode(&request)
+	var request models.TodoIn
+	err := request.Validate()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+	err = json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err)
@@ -47,13 +50,14 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 }
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
-	type Request struct {
-		Topic       string `json:"topic"`
-		Description string `json:"description"`
+	var request models.TodoIn
+	err := request.Validate()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(err)
+		return
 	}
-	var request Request
-
-	err := json.NewDecoder(r.Body).Decode(&request)
+	err = json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err)

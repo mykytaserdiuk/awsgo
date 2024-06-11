@@ -9,10 +9,7 @@ FROM alpine:3.13
 WORKDIR /app
 RUN apk add --no-cache bash
 COPY --from=builder /app/main /app/main
-# COPY internal/repository/migrations/ ./migrations
 COPY scripts/wait-for-it.sh wait-for-it.sh
-# COPY scripts/start.sh start.sh
 
-# RUN "./start.sh"
 EXPOSE 1232
 CMD ["./main"]

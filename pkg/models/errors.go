@@ -3,5 +3,7 @@ package models
 import "errors"
 
 var (
-	ErrTodoNotFound = errors.New("todo not found")
+	ErrorUnvalidDescription = errors.New("description is not valid")
+	ErrorUnvalidTopic       = errors.New("topic is not valid")
+	ErrTodoNotFound         = errors.New("todo not found")
 )
